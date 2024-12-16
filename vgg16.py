@@ -32,7 +32,7 @@ def set_parameter_requires_grad(model, feature_extracting):
 if __name__=="__main__":
     import torch.nn as nn
     from torch.utils.data import DataLoader
-    from shankedataset.readdata import Pokemon
+    from readdata import YoloData
     
     # In[]
     learning_rate=0.001
@@ -41,9 +41,9 @@ if __name__=="__main__":
     LR = 0.01              # learning rate
     # In[]
     
-    train_dataset = Pokemon('pokeman', 224, 'train')
-    val_dataset = Pokemon('pokeman', 224, 'val')
-    test_dataset = Pokemon('pokeman', 224, 'test')
+    train_dataset = YoloData('pokeman', 224, 'train')
+    val_dataset = YoloData('pokeman', 224, 'val')
+    test_dataset = YoloData('pokeman', 224, 'test')
     
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     test_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)

@@ -14,9 +14,9 @@ import glob
 import csv
 import random
 
-class Pokemon(Dataset):
-    def __init__(self, root, resize, mode):
-        super(Pokemon, self).__init__()
+class YoloData(Dataset):
+    def __init__(self, root, resize, stage, mode="uni-classifier"):
+        super(YoloData, self).__init__()
         self.root = root
         self.resize = resize
         #self.name2label = {}  # "sq...":0
@@ -26,11 +26,11 @@ class Pokemon(Dataset):
         #    self.name2label[name] = len(self.name2label.keys()) #将英文标签名转化数字0-4
         # print(self.name2label)
         # image, label
-        self.images, self.labels = self.load_csv('images.csv')  #csv文件存在 直接读取
-        if mode == 'train':  # 60%                   
+        self.images, self.labels = self.load_csv('images.csv', mode)  #csv文件存在 直接读取
+        if stage == 'train':  # 60%                   
             self.images = self.images[:int(0.8 * len(self.images))]
             self.labels = self.labels[:int(0.8 * len(self.labels))]
-        elif mode == 'val':  # 20% = 60%->80%
+        elif stage == 'val':  # 20% = 60%->80%
             self.images = self.images[int(
                 0.8 * len(self.images)):int(0.9 * len(self.images))]
             self.labels = self.labels[int(
@@ -64,7 +64,7 @@ class Pokemon(Dataset):
         label = torch.tensor(label)  #转化tensor
         return img, label       #返回当前的数据内容和标签
     
-    def load_csv(self, filename):
+    def load_csv(self, filename, mode):
         if not os.path.exists(os.path.join(self.root, filename)): 
         	     #如果没有保存csv文件，那么我们需要写一个csv文件，如果有了直接读取csv文件
             images = []
@@ -110,7 +110,7 @@ class Pokemon(Dataset):
         x = x_hat * std + mean
         return x
 if __name__=='__main__':
-    db = Pokemon('pokeman', 224, 'train')
+    db = YoloData('pokeman', 224, 'train')
     loader = DataLoader(db, batch_size=32, shuffle=True)
     for x, y in loader: #此时x,y是批量的数据
         print(x.shape)
