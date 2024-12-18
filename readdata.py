@@ -18,26 +18,21 @@ class YoloData(Dataset):
     def __init__(self, root, resize, stage, mode="uni-classifier"):
         super(YoloData, self).__init__()
         self.root = root
+        self.stage = stage
         self.resize = resize
-        #self.name2label = {}  # "sq...":0
-        #for name in sorted(os.listdir(os.path.join(root))):
-        #    if not os.path.isdir(os.path.join(root, name)):
-        #        continue
-        #    self.name2label[name] = len(self.name2label.keys()) #将英文标签名转化数字0-4
+        self.name2label = {}  # "sq...":0
+        for name in sorted(os.listdir(os.path.join(root, 'images', stage))):
+            label = ["-1 0 0 0 0 0"]
+            labelfilepath = os.path.join(root, 'labels', stage, name.split('.')[0]+'.txt')
+            if os.path.exists(labelfilepath) and not os.path.isdir(labelfilepath):
+                ff = open(labelfilepath)
+                label = ff.readlines()
+                ff.close()
+
+            self.name2label[name] = label
         # print(self.name2label)
         # image, label
-        self.images, self.labels = self.load_csv('images.csv', mode)  #csv文件存在 直接读取
-        if stage == 'train':  # 60%                   
-            self.images = self.images[:int(0.8 * len(self.images))]
-            self.labels = self.labels[:int(0.8 * len(self.labels))]
-        elif stage == 'val':  # 20% = 60%->80%
-            self.images = self.images[int(
-                0.8 * len(self.images)):int(0.9 * len(self.images))]
-            self.labels = self.labels[int(
-                0.8 * len(self.labels)):int(0.9 * len(self.labels))]
-        else:  # 20% = 80%->100%
-            self.images = self.images[int(0.9 * len(self.images)):]
-            self.labels = self.labels[int(0.9 * len(self.labels)):]
+        self.images, self.labels = self.load_csv(mode+'-'+stage+'-images.csv', mode)  #csv文件存在 直接读取
 
     def __len__(self):
         return len(self.images)
@@ -61,7 +56,7 @@ class YoloData(Dataset):
 					                                 std=[0.229, 0.224, 0.225])
        							 ])
         img = tf(img)
-        label = torch.tensor(label)  #转化tensor
+        label = torch.tensor(label + 1)  #转化tensor
         return img, label       #返回当前的数据内容和标签
     
     def load_csv(self, filename, mode):
@@ -70,17 +65,18 @@ class YoloData(Dataset):
             images = []
             for name in self.name2label.keys():   
             	            # 'pokemon\\mewtwo\\00001.png
-                images += glob.glob(os.path.join(self.root, name, '*.png'))
-                images += glob.glob(os.path.join(self.root, name, '*.jpg'))
-                images += glob.glob(os.path.join(self.root, name, '*.jpeg'))
+                images += glob.glob(os.path.join(os.path.join(self.root, 'images', self.stage), name))
+                #images += glob.glob(os.path.join(os.path.join(self.root, 'images'), name, '*.jpg'))
+                #images += glob.glob(os.path.join(os.path.join(self.root, 'images'), name, '*.jpeg'))
                 	
             	        
             random.shuffle(images)
+            # print(images)
             with open(os.path.join(self.root, filename), mode='w', newline='') as f:
                 writer = csv.writer(f)
                 for img in images:  # 'pokemon\\bulbasaur\\00000000.png'
-                    name = img.split(os.sep)[-2]        #从名字就可以读取标签
-                    label = self.name2label[name]
+                    name = img.split(os.sep)[-1]        #从名字就可以读取标签
+                    label = self.name2label[name][0].split()[0]
                     	                # 'pokemon\\bulbasaur\\00000000.png', 0
                     writer.writerow([img, label])  #写进csv文件
         	

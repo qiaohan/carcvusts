@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torchvision import models
+import os
 
 class VGGnet(nn.Module):
     def __init__(self,feature_extract=True,num_classes=5):
@@ -36,14 +37,14 @@ if __name__=="__main__":
     
     # In[]
     learning_rate=0.001
-    num_epochs = 2               # train the training data n times, to save time, we just train 1 epoch
+    num_epochs = 4               # train the training data n times, to save time, we just train 1 epoch
     batch_size = 32
     LR = 0.01              # learning rate
     # In[]
     
-    train_dataset = YoloData('pokeman', 224, 'train')
-    val_dataset = YoloData('pokeman', 224, 'val')
-    test_dataset = YoloData('pokeman', 224, 'test')
+    train_dataset = YoloData(os.path.join('D:\\mycode\\classicmodels\\shankedataset','datasetjj'), 224, 'train')
+    val_dataset = YoloData(os.path.join('D:\\mycode\\classicmodels\\shankedataset','datasetjj'), 224, 'val')
+    test_dataset = YoloData(os.path.join('D:\\mycode\\classicmodels\\shankedataset','datasetjj'), 224, 'val')
     
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     test_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
